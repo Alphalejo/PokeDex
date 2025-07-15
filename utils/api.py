@@ -2,9 +2,14 @@ import streamlit as st
 
 import requests
 import utils.styles as styles
+import utils.charts as charts
 
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
+
+#_____________________________________________________________________________________________________
+# Function to get data from the API
+# This function fetches data for a specific asset and name, with optional parameters
 
 def get_data(asset="", name="", params=None):
     try:
@@ -14,12 +19,16 @@ def get_data(asset="", name="", params=None):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         return None
-    
+
+
+#_____________________________________________________________________________________________________
+# Function to fetch data for all Pokemon
+# This function fetches data for all Pokemon and displays their names in a multiselect widget
 def pokemon_data(asset="", asset_name=""):
     """
     Fetches data for all Pokemon.
     """
-    data = get_data(asset, asset_name.lower())
+    data = get_data(asset, asset_name)
 
     type_names = [type["type"]["name"] for type in data.get("types", [])]
     col1, col2 = st.columns([1,3])
@@ -43,3 +52,18 @@ def pokemon_data(asset="", asset_name=""):
         st.text(f"height: {data['height']}")
         st.text(f"weight: {data['weight']}")
         st.text(f"base experience: {data['base_experience']}")
+    
+    st.plotly_chart(charts.pokemon_stats_chart(asset=asset, name=asset_name), use_container_width=True)
+
+#_____________________________________________________________________________________________________
+# Function to fetch data for all Pokemon names
+# This function fetches data for all Pokemon and displays their names in a multiselect widget
+
+def all_pokemon_names():
+
+    response = requests.get(url+"pokemon?limit=20000").json()
+    pokemon_names = [entry['name'] for entry in response['results']]
+    
+    return pokemon_names
+
+#_____________________________________________________________________________________________________

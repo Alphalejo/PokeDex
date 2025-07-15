@@ -1,5 +1,3 @@
-import streamlit as st
-
 def Pokemon_type_style (bg_color, font_color, type_name):
     """
     Returns a styled HTML span element for the given Pokemon type.
@@ -16,24 +14,25 @@ def Pokemon_type_style (bg_color, font_color, type_name):
         """)
  
 def pokemon_type(type_name):
-    types = {
-        "normal": Pokemon_type_style ("#c996a5", "#6f525a", "Normal"),
-        "fire": Pokemon_type_style ("#ae1d26", "#FD4B5A", "Fire"),
-        "water": Pokemon_type_style ("#1552E1", "#85A8FB", "Water"),
-        "grass": Pokemon_type_style ("#147B3D", "#27CB50", "Grass"),
-        "electric": Pokemon_type_style ("#E2E32B", "#333333", "Electric"),
-        "ice": Pokemon_type_style ("#86D2F5", "#D8F0FA", "Ice"),
-        "fighting": Pokemon_type_style ("#994025", "#EF6239", "Fighting"),
-        "poison": Pokemon_type_style ("#5E2D89", "#9B69DA", "Poison"),
-        "ground": Pokemon_type_style ("#A8702D", "#6E491F", "Ground"),
-        "flying": Pokemon_type_style ("#4A677D", "#94B2C7", "Flying"),
-        "psychic": Pokemon_type_style ("#A52A6C", "#F71D92", "Psychic"),
-        "bug": Pokemon_type_style ("#1C4B27", "#3C9950", "Bug"),
-        "rock": Pokemon_type_style ("#48190B", "#8B3E22", "Rock"),
-        "ghost": Pokemon_type_style ("#33336B", "#906791", "Ghost"),
-        "dragon": Pokemon_type_style ("#448A95", "#62CAD9", "Dragon"),
-        "dark": Pokemon_type_style ("#040707", "#595978", "Dark"),
-        "steel": Pokemon_type_style ("#60756E", "#43BD94", "Steel"),
-        "fairy": Pokemon_type_style ("#961A45", "#E91368", "Fairy")
+    return Pokemon_type_style(types[type_name][0], types[type_name][1], type_name.capitalize()) if type_name in types else ""
+
+types = {
+        "normal": ("#c996a5", "#6f525a"),
+        "fire": ("#ae1d26", "#FD4B5A"),
+        "water": ("#1552E1", "#85A8FB"),
+        "grass": ("#147B3D", "#27CB50"),
+        "electric": ("#E2E32B", "#333333"),
+        "ice": ("#86D2F5", "#D8F0FA"),
+        "fighting": ("#994025", "#EF6239"),
+        "poison": ("#5E2D89", "#9B69DA"),
+        "ground": ("#A8702D", "#6E491F"),
+        "flying": ("#4A677D", "#94B2C7"),
+        "psychic": ("#A52A6C", "#F71D92"),
+        "bug": ("#1C4B27", "#3C9950"),
+        "rock": ("#48190B", "#8B3E22"),
+        "ghost": ("#33336B", "#906791"),
+        "dragon": ("#448A95", "#62CAD9"),
+        "dark": ("#040707", "#595978"),
+        "steel": ("#60756E", "#43BD94"),
+        "fairy": ("#961A45", "#E91368")
     }
-    return types.get(type_name, Pokemon_type_style("#ccc", "#fff", "Unknown Type"))
