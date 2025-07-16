@@ -13,21 +13,22 @@ st.subheader("By Alphalejo")
 #Select Function
 function = st.pills(
     label="Select Function",
-    options=["Information", "Compare"],
+    options=["Information", "Compare", "VS", "Team Generator"],
     selection_mode="single",
     default="Information",
 )
 
-# Select asset type
-# take the selected option selected and convert it to lowercase
-asset = str(st.pills(
-    label="Select Asset Type",
-    options=["Pokemon", "Berry", "Item", "Location"],
-    selection_mode="single",
-    default="Pokemon",)
-).lower()
-
 if function == "Information":
+
+    # Select asset type
+    # take the selected option selected and convert it to lowercase
+    asset = str(st.pills(
+        label="Select Asset Type",
+        options=["Pokemon", "Berry", "Item", "Location"],
+        selection_mode="single",
+        default="Pokemon",)
+    ).lower()
+
     #input for asset name
     asset_name = str(st.selectbox(
         "Enter the name of a Pokemon:",
@@ -35,7 +36,7 @@ if function == "Information":
     )
     # Display the Pokemon data
     if asset_name:
-        print(asset, asset_name) # Debugging line to check the asset and name
+        #print(asset, asset_name) # Debugging line to check the asset and name
         
         if asset == "pokemon":
             ui_blocks.pokemon_data(asset, asset_name)
@@ -46,6 +47,13 @@ if function == "Information":
 elif function == "Compare":
     
     ui_blocks.compare_dashboard()
+
+elif function == "VS":
+    
+    ui_blocks.vs_dashboard()
+
+elif function == "Team Generator":
+    st.write("Team Generator functionality is not implemented yet.")
 
 else:
     st.write("Please select a valid function.")

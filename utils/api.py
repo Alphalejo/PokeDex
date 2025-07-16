@@ -40,3 +40,14 @@ def all_pokemon_types():
     """
     response = requests.get(url + "type").json()
     return [type_info['name'] for type_info in response['results']]
+
+#_____________________________________________________________________________________________________
+
+def get_pokemon_sprite(pokemon_name):
+    """
+    Fetches the sprite URL for a given Pokemon name.
+    """
+    data = get_data(asset="pokemon", name=pokemon_name)
+    if data and "sprites" in data and "front_default" in data["sprites"]:
+        return data["sprites"]["front_default"]
+    return None
