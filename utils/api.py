@@ -1,4 +1,5 @@
 import requests
+import numpy as np
 
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
@@ -93,35 +94,27 @@ def get_damage_multipliers(pokemon):
         else: pass
     else: return None
 
-    #-------------------------------------------------------------
-    # Create dictionaries to store attack and defence relations (damage multipliers)
-    atack_relation = dict.fromkeys(all_pokemon_types(), 1)   
+    types = np.array(all_pokemon_types())
+    n_tipys = len(types)
+    atack_relation = np.ones(n_tipys)  # Initialize attack relation with ones
+    defence_relation = np.ones(n_tipys)  # Initialize defence relation with ones
 
-    for type_name in list(set(double_damage_to)):
-        atack_relation[type_name] *= 2
-    
-    for type_name in list(set(half_damage_to)):
-        atack_relation[type_name] *= 0.5
-    
-    for type_name in list(set(no_damage_to)):
-        atack_relation[type_name] *= 0
+    double_from_mask = np.isin(types, double_damage_from)
+    double_to_mask = np.isin(types, double_damage_to)
+    half_from_mask = np.isin(types, half_damage_from)
+    half_to_mask = np.isin(types, half_damage_to)
+    no_from_mask = np.isin(types, no_damage_from)
+    no_to_mask = np.isin(types, no_damage_to)
 
-    #------------------------------------------------------------
-    defence_relation = dict.fromkeys(all_pokemon_types(), 1)
+    atack_relation[double_to_mask] *= 2
+    atack_relation[half_to_mask] *= 0.5
+    atack_relation[no_to_mask] *= 0
 
-    for type_name in list(set(double_damage_from)):
-        defence_relation[type_name] *= 2
+    defence_relation[double_from_mask] *= 2
+    defence_relation[half_from_mask] *= 0.5
+    defence_relation[no_from_mask] *= 0
 
-    for type_name in list(set(half_damage_from)):
-        defence_relation[type_name] *= 0.5
-
-    for type_name in list(set(no_damage_from)):
-        defence_relation[type_name] *= 0
-
-    return {
-        "attack": atack_relation,
-        "defence": defence_relation
-    }
+    return [types, atack_relation, defence_relation]
 
 #_____________________________________________________________________________________________________
 # Function to calculate damage multipliers for a given Pokemon
@@ -130,8 +123,30 @@ def get_damage_relations(pokemon):
     
     damage_multipliers = get_damage_multipliers(pokemon)
 
-    double_damage_from = damage_multipliers['defence']['double_damage_from']
-    double_damage_to
+    double_damage_from = []
+    double_damage_to = []
+    half_damage_from = []
+    half_damage_to = []
+    no_damage_from = []
+    no_damage_to = []
+
+    for type, attack, deffence in zip(damage_multipliers[0], damage_multipliers[1], damage_multipliers[2]):
+        if attack == 2:
+            double_damage_to.append(type)
+        elif attack == 0.5:
+            half_damage_to.append(type)
+        elif attack == 0:
+            no_damage_to.append(type)
+        else: pass
+
+        if deffence == 2:
+            double_damage_from.append(type)
+        elif deffence == 0.5:
+            half_damage_from.append(type)
+        elif deffence == 0:
+            no_damage_from.append(type)
+        else: pass
+
     return {
         "double_damage_from": double_damage_from,
         "double_damage_to": double_damage_to,
@@ -142,3 +157,5 @@ def get_damage_relations(pokemon):
 
 #_____________________________________________________________________________________________________
  
+
+

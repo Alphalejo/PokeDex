@@ -52,7 +52,30 @@ elif function == "Compare":
 
 elif function == "VS":
     
-    ui_blocks.vs_dashboard()
+    st.write("VS Dashboard")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        pokemon1 = st.selectbox(
+            "Select the first Pokemon:",
+            options=api.all_pokemon_names(),
+            index=None,
+            placeholder = "Select a Pokemon"
+        )
+
+    with col2:
+        pokemon2 = st.selectbox(
+            "Select the second Pokemon:",
+            options=api.all_pokemon_names(),
+            index=None,
+            placeholder = "Select a Pokemon"
+        )
+
+    
+    ui_blocks.vs_dashboard(pokemon1, pokemon2)
+    success = ui_blocks.predict_success(pokemon1, pokemon2)
+    st.text(success)
 
 elif function == "Team Generator":
     st.write("Team Generator functionality is not implemented yet.")
