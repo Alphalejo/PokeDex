@@ -1,0 +1,122 @@
+"""import streamlit as st
+import plotly.graph_objects as go
+
+fig = go.Figure()
+fig.add_trace(go.Scatterpolar(
+    r=[80, 90, 70, 60, 85, 80],
+    theta=['Speed', 'Attack', 'Defense', 'HP', 'Special', 'Speed'],
+    fill='toself',
+    name='Pikachu',
+    line=dict(color='gold'),
+    fillcolor='rgba(255,215,0,0.3)'
+))
+
+fig.update_layout(
+    polar=dict(bgcolor='rgba(0,0,0,0)'),
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='white'),
+    showlegend=True
+)
+
+st.plotly_chart(fig, use_container_width=True)
+"""
+
+"""
+import requests
+import streamlit as st
+
+url= "https://pokeapi.co/api/v2/pokemon?limit=100000"
+response = requests.get(url).json()
+pokemon_names = [entry['name'] for entry in response['results']]
+print(len(pokemon_names))
+
+st.multiselect(
+    "Select Pokemon to compare:",
+    options=pokemon_names)
+"""
+"""
+import requests
+
+data = requests.get("https://pokeapi.co/api/v2/pokemon/ditto").json()
+
+try:
+    pokemon_type = data['types'][1]['type']['name'] # Get the Pokémon's first type to know the color for the chart
+except IndexError:
+    pokemon_type = "other"
+print(pokemon_type)
+"""
+
+"""
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+index= ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
+cols = ['A', 'B', 'C', 'D']
+df = pd.DataFrame(abs(np.random.randn(5, 4)), index=index, columns=cols)
+df = df.style.background_gradient(cmap='YlOrRd')
+
+st.dataframe(df, use_container_width=True)
+"""
+
+"""
+import streamlit as st
+import requests
+
+url = "https://pokeapi.co/api/v2/type/"
+name = "steel"
+response = requests.get(f"{url}{name}").json()
+
+st.header(f"id: {response['id']}")
+st.title(f"name: {response['name']}")
+st.text(f"damage_relations: {response['damage_relations']}")
+#st.text(f"past_damage_relations: {response['past_damage_relations']}")
+#st.text(f"game_indices: {response['game_indices']}")
+#st.text(f"generation: {response['generation']}")
+#st.text(f"move_damage_class: {response['move_damage_class']}")
+#st.text(f"moves: {response['moves']}")
+#st.text(f"pokemon: {response['pokemon']}")
+
+st.header("Damage Relations")
+st.text("double_damage_from:")
+st.text([response['damage_relations']['double_damage_from'][i]['name'] for i in range(len(response['damage_relations']['double_damage_from']))])
+
+st.text("double_damage_to:")
+st.text([response['damage_relations']['double_damage_to'][i]['name'] for i in range(len(response['damage_relations']['double_damage_to']))])
+
+st.text("half_damage_from:")
+st.text([response['damage_relations']['half_damage_from'][i]['name'] for i in range(len(response['damage_relations']['half_damage_from']))])
+
+st.text("half_damage_to:")
+st.text([response['damage_relations']['half_damage_to'][i]['name'] for i in range(len(response['damage_relations']['half_damage_to']))])
+
+st.text("No_damage_from:")
+st.text([response['damage_relations']['no_damage_from'][i]['name'] for i in range(len(response['damage_relations']['no_damage_from']))])
+
+st.text("no_damage_to:")
+st.text([response['damage_relations']['no_damage_to'][i]['name'] for i in range(len(response['damage_relations']['no_damage_to']))])
+
+import utils.api as api
+import timeit
+
+st.header("Damage Multipliers for Bulbasaur")
+#st.text(api.get_damage_multipliers("bulbasaur")["attack"][0])
+print(api.get_damage_multipliers("bulbasaur")["defence"])
+#print(api.get_damage_multipliers("bulbasaur")["defence"].values())
+#print([type for type, value in api.get_damage_multipliers("bulbasaur")['defence'].items() if value == 2])
+
+print(api.get_damage_multipliers2("bulbasaur"))
+
+
+time_a = timeit.timeit("api.get_damage_multipliers('bulbasaur')", globals=globals(), number=100)
+time_b = timeit.timeit("api.get_damage_multipliers2('bulbasaur')", globals=globals(), number=100)
+
+print(f"Function A took {time_a:.5f} seconds")
+print(f"Function B took {time_b:.5f} seconds")
+"""
+
+import utils.api as api
+
+print(api.get_data("pokemon","pikachu")["stats"][1]["base_stat"])
