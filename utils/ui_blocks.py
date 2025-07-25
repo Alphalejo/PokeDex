@@ -5,6 +5,8 @@ import utils.api as api
 import utils.styles as styles
 import utils.charts as charts
 
+import joblib
+
 
 
 def show_pokemon_types(type_names):
@@ -151,3 +153,4 @@ def predict_success(pokemon1, pokemon2):
 
     attack1 = api.get_data("pokemon",pokemon1)["stats"][1]["base_stat"]
     deffence1 = api.get_data("pokemon",pokemon2)["stats"][1]["base_stat"]
+
