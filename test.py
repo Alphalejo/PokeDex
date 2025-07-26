@@ -116,7 +116,44 @@ time_b = timeit.timeit("api.get_damage_multipliers2('bulbasaur')", globals=globa
 print(f"Function A took {time_a:.5f} seconds")
 print(f"Function B took {time_b:.5f} seconds")
 """
-
+"""
 import utils.api as api
 
-print(api.get_data("pokemon","pikachu")["stats"][1]["base_stat"])
+#print([api.get_data("pokemon","pikachu")["stats"][i]["base_stat"] for i in range(6)])
+#print(api.get_data("pokemon-species","pikachu")["is_legendary"])
+
+stats_pokemon1 = (
+    [api.get_data("pokemon","pikachu")["stats"][i]["base_stat"] for i in range(6)]
+)
+api.get_data("pokemon-species","pikachu")["is_legendary"])
+print(stats_pokemon1)
+"""
+"""
+import utils.api as api
+
+#print(np.full(17, False))
+lista = [False] * 17
+print(lista)
+
+tipos = {
+    'dark': 0, 'dragon': 1, 'electric': 2,
+    'fairy': 3, 'fighting': 4, 'fire': 5,
+    'flying': 6, 'ghost': 7, 'grass': 8,
+    'ground': 9, 'ice': 10, 'normal': 11,
+    'poison': 12, 'psychic': 13, 'rock': 14,
+    'steel': 15, 'water': 16
+}
+
+
+pokemontypes = api.get_pokemon_types("bulbasaur")
+
+for type in pokemontypes:
+    lista[tipos[type]] = True
+
+[lista[tipos[type]] = True for type in pokemontypes]
+print(lista)
+"""
+
+import utils.ui_blocks as blocks
+
+print(blocks.predict_success("charizard", "blastoise"))

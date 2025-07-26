@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 import utils.api as api
 import utils.styles as styles
@@ -151,6 +152,57 @@ def vs_dashboard(pokemon1, pokemon2):
 
 def predict_success(pokemon1, pokemon2):
 
-    attack1 = api.get_data("pokemon",pokemon1)["stats"][1]["base_stat"]
-    deffence1 = api.get_data("pokemon",pokemon2)["stats"][1]["base_stat"]
+    model = joblib.load("C:\Projects\PokeDex\model\RandomForestClassifier.joblib")
 
+    stats_pokemon1 =(
+        [api.get_data("pokemon",pokemon1)["stats"][i]["base_stat"] for i in range(6)]
+    )
+    stats_pokemon1.append(api.get_data("pokemon-species",pokemon1)["is_legendary"])
+
+    stats_pokemon2 =(
+        [api.get_data("pokemon",pokemon2)["stats"][i]["base_stat"] for i in range(6)]
+    )
+    stats_pokemon2.append(api.get_data("pokemon-species",pokemon2)["is_legendary"])
+
+    # The model recives a boolean list for the pokemon type
+    pokemon1_type1 = [False] * 17
+    pokemon1_type2 = [False] * 17
+    # The type number 18 is none, when the pokemon has only one type
+    pokemon2_type1 = [False] * 18
+    pokemon2_type2 = [False] * 18
+
+    # Index of each type in the boolean list
+    types1 = {
+    'dark': 0, 'dragon': 1, 'electric': 2,
+    'fairy': 3, 'fighting': 4, 'fire': 5,
+    'flying': 6, 'ghost': 7, 'grass': 8,
+    'ground': 9, 'ice': 10, 'normal': 11,
+    'poison': 12, 'psychic': 13, 'rock': 14,
+    'steel': 15, 'water': 16}
+
+    types2 = {
+    'dark': 0, 'dragon': 1, 'electric': 2,
+    'fairy': 3, 'fighting': 4, 'fire': 5,
+    'flying': 6, 'ghost': 7, 'grass': 8,
+    'ground': 9, 'ice': 10, 'none' : 11, 'normal': 12,
+    'poison': 13, 'psychic': 14, 'rock': 15,
+    'steel': 16, 'water': 17}
+
+    # Replacing false for True the pokemon types
+    pokemon1_type1[types1[api.get_pokemon_types(pokemon1)[0]]] = True
+    try:
+        pokemon1_type2[types2[api.get_pokemon_types(pokemon1)[1]]] = True
+    except:
+        pokemon1_type2[types2['none']] = True
+
+    pokemon2_type1[types1[api.get_pokemon_types(pokemon2)[0]]] = True
+    try:
+        pokemon2_type2[types2[api.get_pokemon_types(pokemon2)[1]]] = True
+    except:
+        pokemon2_type2[types2['none']] = True
+
+    # Generate the final list to feed the ML algorithm
+    total_stats = stats_pokemon1 + stats_pokemon2 + pokemon1_type1 + pokemon2_type1 + pokemon1_type2 + pokemon2_type2
+    
+    return model.predict(np.array(total_stats).reshape(1,-1))
+     
