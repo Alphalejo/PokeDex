@@ -153,7 +153,24 @@ for type in pokemontypes:
 [lista[tipos[type]] = True for type in pokemontypes]
 print(lista)
 """
-
+"""
 import utils.ui_blocks as blocks
 
 print(blocks.predict_success("charizard", "blastoise"))
+"""
+
+import streamlit as st
+import utils.api as api
+
+pokemon = "venusaur"
+data = api.get_data("pokemon", pokemon)
+#st.title(f"{pokemon.capitalize()} Wins")
+#st.image(data["sprites"]["front_default"], use_container_width=False, width=250)
+#st.markdown(f"<h3 style='text-align: center;'>#{data['id']}</h3>", unsafe_allow_html=True)
+st.markdown(f"""
+    <div style='text-align: center;'>
+        <h1>{pokemon.capitalize()} Wins</h1>
+        <img src='{data["sprites"]["front_default"]}' width='250'/>
+        <h3>#{data['id']}</h3>
+    </div>
+""", unsafe_allow_html=True)

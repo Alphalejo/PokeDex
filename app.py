@@ -72,10 +72,10 @@ elif function == "VS":
             placeholder = "Select a Pokemon"
         )
 
-    
-    ui_blocks.vs_dashboard(pokemon1, pokemon2)
-    success = ui_blocks.predict_success(pokemon1, pokemon2)
-    st.text(success)
+    if pokemon1 and pokemon2:
+        ui_blocks.vs_dashboard(pokemon1, pokemon2)
+        success = ui_blocks.predict_success_block(pokemon1, pokemon2)
+    else: pass
 
 elif function == "Team Generator":
     st.write("Team Generator functionality is not implemented yet.")
