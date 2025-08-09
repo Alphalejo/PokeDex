@@ -159,18 +159,53 @@ import utils.ui_blocks as blocks
 print(blocks.predict_success("charizard", "blastoise"))
 """
 
-import streamlit as st
+"""import streamlit as st
 import utils.api as api
 
 pokemon = "venusaur"
 data = api.get_data("pokemon", pokemon)
 #st.title(f"{pokemon.capitalize()} Wins")
 #st.image(data["sprites"]["front_default"], use_container_width=False, width=250)
-#st.markdown(f"<h3 style='text-align: center;'>#{data['id']}</h3>", unsafe_allow_html=True)
+#st.markdown(f"<h3 style='text-align: center;'>#{data['id']}</h3>", unsafe_allow_html=True)"""
+#st.markdown(f"""
+#    <div style='text-align: center;'>
+#        <h1>{pokemon.capitalize()} Wins</h1>
+#        <img src='{data["sprites"]["front_default"]}' width='250'/>
+#        <h3>#{data['id']}</h3>
+#    </div>
+#""", unsafe_allow_html=True)
+
+
+
+import streamlit as st
+import utils.api as api
+
+def loading():
+    lottie_html = """
+                <h3 style="text-align: center; color: #FFF; padding-top: 50px;">Fighting...</h3>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
+                    <dotlottie-wc 
+                        src="https://lottie.host/9c3f548f-1f6b-4b43-bda7-78a72e2a0d0a/Nl7MBaCpvO.lottie"
+                        style="width: 100px; height: 100px;" 
+                        speed="1" autoplay loop>
+                    </dotlottie-wc>
+                </div>
+                """
+
+    return st.components.v1.html(lottie_html, height=400)
+
+loading()
+
+pokemon = "venusaur"
+data = api.get_data("pokemon", pokemon)
 st.markdown(f"""
-    <div style='text-align: center;'>
+    <div style='text-align: center; position: relative; display: inline-block;'>
         <h1>{pokemon.capitalize()} Wins</h1>
-        <img src='{data["sprites"]["front_default"]}' width='250'/>
+        <img src='{data["sprites"]["front_default"]}' width='250' style='position: relative; z-index: 1;'/>
+        <!-- GIF de celebración superpuesto -->
+        <img src='https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExODg0MWZydW1lMjJ3Zjd2YnM3cTU4ZXVqZXduNzd5eW5sbnY0YjQ0cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gKrbnqo25MlI2TUC78/giphy.gif'
+             style='position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; width: 300px;'/>
         <h3>#{data['id']}</h3>
     </div>
 """, unsafe_allow_html=True)

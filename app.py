@@ -74,7 +74,10 @@ elif function == "VS":
 
     if pokemon1 and pokemon2:
         ui_blocks.vs_dashboard(pokemon1, pokemon2)
-        success = ui_blocks.predict_success_block(pokemon1, pokemon2)
+        
+        with st.empty():
+            ui_blocks.loading_icon()
+            success = ui_blocks.predict_success_block(pokemon1, pokemon2)
     else: pass
 
 elif function == "Team Generator":
