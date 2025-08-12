@@ -82,10 +82,11 @@ def get_pokemon_description(pokemon_name):
 
     # Text cleaning
     clean_description = data_utils.clean_texts(raw_descriptions)
+    unique_descriptions = data_utils.remove_similar_texts2(list(clean_description))
 
-    full_description = "".join(clean_description)
+    full_description = "".join(unique_descriptions)
 
-    return clean_description
+    return full_description
 #_____________________________________________________________________________________________________
 # Function to fetch damage relations for a given Pokemon
 
