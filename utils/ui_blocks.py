@@ -98,52 +98,47 @@ def vs_dashboard(pokemon1, pokemon2):
     """
     Dashboard for comparing two Pokemon stats.
     """
-    if pokemon1 and pokemon2:
+    types1 = api.get_pokemon_types(pokemon1)
+    types2 = api.get_pokemon_types(pokemon2)
 
-        types1 = api.get_pokemon_types(pokemon1)
-        types2 = api.get_pokemon_types(pokemon2)
+    # Fetch damage relations for both Pokemons
+    # Convert the damage relations to a more readable format (str instead of np.str_)
+    strenghts1 = { key: [str(x) for x in value] for key, value in api.get_damage_relations(pokemon1).items()}
+    strenghts2 = { key: [str(x) for x in value] for key, value in api.get_damage_relations(pokemon2).items()}
 
-        # Fetch damage relations for both Pokemons
-        # Convert the damage relations to a more readable format (str instead of np.str_)
-        strenghts1 = { key: [str(x) for x in value] for key, value in api.get_damage_relations(pokemon1).items()}
-        strenghts2 = { key: [str(x) for x in value] for key, value in api.get_damage_relations(pokemon2).items()}
+    col2_1, col2_2 = st.columns(2)
 
-        col2_1, col2_2 = st.columns(2)
+    with col2_1:
+        #pokemon_data(asset="pokemon", asset_name=pokemon1)
+        #st.text(f"strenghts1: {strenghts1['double_damage_from']}")
+        #st.text(f"Weakness1: {', '.join(strenghts1['double_damage_from'])}")
 
-        with col2_1:
-            pokemon_data(asset="pokemon", asset_name=pokemon1)
-            #st.text(f"strenghts1: {strenghts1['double_damage_from']}")
-            #st.text(f"Weakness1: {', '.join(strenghts1['double_damage_from'])}")
+        if any(t in types2 for t in strenghts1["double_damage_from"]):
+            st.badge(f"💀 {pokemon1} is weak against {pokemon2}", color="orange")
+        
+        elif any(t in types2 for t in strenghts1["double_damage_to"]):
+            st.badge(f"⚔️ {pokemon1} is strong against {pokemon2}", color="green")
 
-            if any(t in types2 for t in strenghts1["double_damage_from"]):
-                st.badge(f"💀 {pokemon1} is weak against {pokemon2}", color="orange")
-            
-            elif any(t in types2 for t in strenghts1["double_damage_to"]):
-                st.badge(f"⚔️ {pokemon1} is strong against {pokemon2}", color="green")
+        elif any(t in types2 for t in strenghts1["no_damage_to"]):
+            st.badge(f"❌ {pokemon1} has no effect to {pokemon2}", color="red")
 
-            elif any(t in types2 for t in strenghts1["no_damage_to"]):
-                st.badge(f"❌ {pokemon1} has no effect to {pokemon2}", color="red")
+        else: pass
 
-            else: pass
+    with col2_2:
+        #pokemon_data(asset="pokemon", asset_name=pokemon2)
+        #st.text(f"strenghts2: {', '.join(strenghts2['double_damage_to'])}")
+        #st.text(f"Weakness2: {', '.join(strenghts2['double_damage_from'])}")
 
-        with col2_2:
-            pokemon_data(asset="pokemon", asset_name=pokemon2)
-            #st.text(f"strenghts2: {', '.join(strenghts2['double_damage_to'])}")
-            #st.text(f"Weakness2: {', '.join(strenghts2['double_damage_from'])}")
+        if any(t in types1 for t in strenghts2["double_damage_from"]):
+            st.badge(f"💀 {pokemon2} is weak against {pokemon1}", color="orange")
+        
+        elif any(t in types1 for t in strenghts2["double_damage_to"]):
+            st.badge(f"⚔️ {pokemon2} is strong against {pokemon1}", color="green")
+        
+        elif any(t in types1 for t in strenghts2["no_damage_to"]):
+            st.badge(f"❌ {pokemon2} has no effect to {pokemon1}", color="red")
 
-            if any(t in types1 for t in strenghts2["double_damage_from"]):
-                st.badge(f"💀 {pokemon2} is weak against {pokemon1}", color="orange")
-            
-            elif any(t in types1 for t in strenghts2["double_damage_to"]):
-                st.badge(f"⚔️ {pokemon2} is strong against {pokemon1}", color="green")
-            
-            elif any(t in types1 for t in strenghts2["no_damage_to"]):
-                st.badge(f"❌ {pokemon2} has no effect to {pokemon1}", color="red")
-
-            else: pass
-
-    else:
-        st.write("Please select both Pokemons to compare.")
+        else: pass
 
 #=======================================================================================================
 

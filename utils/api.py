@@ -1,6 +1,6 @@
 import requests
 import numpy as np
-
+import data_utils
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
 
@@ -62,6 +62,30 @@ def get_pokemon_sprite(pokemon_name):
         return data["sprites"]["front_default"]
     return None
 
+#_____________________________________________________________________________________________________
+# Function to display the pokedex description of each pokemon
+
+
+# Pokémon API returns all descriptions for each game version and in multiple languages.
+# In English, many are almost identical with only slight variations.
+
+def get_pokemon_description(pokemon_name):
+
+    pokemon_id = get_data(asset="pokemon-species", name=pokemon_name)["id"]
+
+    # Pokémon API returns all descriptions for each game version and in multiple languages.
+    # In English, many are almost identical with only slight variations.
+    pokemon_data = get_data(asset="pokemon-species", name=pokemon_id)
+
+    raw_descriptions = [entry["flavor_text"] for entry in pokemon_data["flavor_text_entries"]
+                       if entry["language"]["name"] == "en"]
+
+    # Text cleaning
+    clean_description = data_utils.clean_texts(raw_descriptions)
+
+    full_description = "".join(clean_description)
+
+    return clean_description
 #_____________________________________________________________________________________________________
 # Function to fetch damage relations for a given Pokemon
 
@@ -159,3 +183,4 @@ def get_damage_relations(pokemon):
  
 
 
+print(get_pokemon_description("pikachu"))

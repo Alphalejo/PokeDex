@@ -209,3 +209,51 @@ st.markdown(f"""
         <h3>#{data['id']}</h3>
     </div>
 """, unsafe_allow_html=True)
+
+import utils.ui_blocks as ui_blocks
+import utils.charts as charts
+
+class pokemondata:
+    def __init__(self, asset, name):
+        self.asset = asset
+        self.name = name
+
+    def display(self):
+        ui_blocks.pokemon_data(self.asset, self.name)
+        st.plotly_chart(charts.pokemon_stats_chart(asset=self.asset, name=self.name), use_container_width=True)
+
+
+function = st.pills(
+    label="Select Function",
+    options=["Information", "Compare", "VS", "Team Generator"],
+    selection_mode="single",
+    default="Information",
+)
+
+
+with st.empty():
+    if function == "Information":
+        viewer = pokemondata("pokemon", "pikachu")
+        viewer.display()
+
+    elif function == "Compare":
+        ui_blocks.pokemon_data("pokemon", "mew")
+        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mew"), use_container_width=True)
+
+    elif function == "VS":
+        ui_blocks.pokemon_data("pokemon", "mewtwo")
+        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mewtwo"), use_container_width=True)
+
+
+
+if function == "Information":
+        ui_blocks.pokemon_data("pokemon", "pikachu")
+        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="pikachu"), use_container_width=True)
+
+elif function == "Compare":
+        ui_blocks.pokemon_data("pokemon", "mew")
+        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mew"), use_container_width=True)
+
+elif function == "VS":
+        ui_blocks.pokemon_data("pokemon", "mewtwo")
+        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mewtwo"), use_container_width=True)
