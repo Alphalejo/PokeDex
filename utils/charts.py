@@ -54,7 +54,7 @@ def pokemon_multichart(pokemons_to_compare):
     fig = pokemon_stats_chart(asset="pokemon", name=pokemons_to_compare[0])
     data = api.get_data(asset="pokemon", name=pokemons_to_compare[0])
     pokemon_types = [data['types'][0]['type']['name']]
-
+    
     for pokemon in pokemons_to_compare[1:]:
 
         # -----------------------------------------------------------------------------------------------------------------

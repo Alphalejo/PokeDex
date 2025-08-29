@@ -1,11 +1,12 @@
 import streamlit as st
+import math
+
 
 import utils.api as api
 import utils.styles as styles
 import utils.charts as charts
 import utils.ML_algorithms as ML
-
-
+from utils.cache import pokemon_data_cache
 
 def show_pokemon_types(type_names):
     badges = "".join([styles.pokemon_type(type_name) for type_name in type_names])
@@ -33,7 +34,7 @@ def pokemon_data(asset="", asset_name=""):
 
     with col1:
         st.image(data["sprites"]["front_default"], use_container_width=True)
-        st.markdown(f"<h3 style='text-align: center;'>#{data['id']}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='text-align: center; padding-top: 0; margin-top: -30px;'>#{data['id']}</h3>", unsafe_allow_html=True)
     
     with col2:
         st.header(f"{asset_name.capitalize()}")
@@ -63,9 +64,6 @@ def show_selected_pokemons(pokemons_to_compare):
                 """,
                 unsafe_allow_html=True
             )
-
-#______________________________________________________________________________________________________________
-
     
 
 #______________________________________________________________________________________________________________
@@ -86,8 +84,9 @@ def compare_dashboard():
         show_selected_pokemons(pokemons_to_compare)
 
         st.dataframe(charts.pokemon_heatmap(pokemons_to_compare), use_container_width=True)
-
-        st.plotly_chart(charts.pokemon_multichart(pokemons_to_compare), use_container_width=True)
+        if len(pokemons_to_compare) > 1:
+            st.plotly_chart(charts.pokemon_multichart(pokemons_to_compare), use_container_width=True)
+        
 
     else:
         st.write("Please select at least one Pokemon to compare.")
@@ -184,4 +183,72 @@ def loading_icon():
             """
 
     return st.components.v1.html(lottie_html, height=400)
+
+
+#=======================================================================================================
+
+def show_description(pokemon):
+    description = api.get_pokemon_description(pokemon)
+
+    # Sample data
+    keys = list(description.keys())
+    keys = [key.capitalize() for key in keys]
+    page_size = 8
+    num_pages = math.ceil(len(keys) / page_size)
+
+    st.subheader("Description on Each Generation")
+
+    # Session state to track current page
+    if "page" not in st.session_state:
+        st.session_state.page = 1
+
+    # Layout: arrows + tabs in one row
+    nav_cols = st.columns([1, 15, 1])
+
+
+    with nav_cols[0]:
+        if st.button("◀", disabled=st.session_state.page == 1):
+            st.session_state.page -= 1
+            st.rerun()
+
+    start = (st.session_state.page - 1) * page_size
+    end = start + page_size
+    tab_keys = keys[start:end]
+
+    with nav_cols[1]:
+        tabs = st.tabs(tab_keys)
+
+    with nav_cols[2]:
+        if st.button("▶", disabled=st.session_state.page == num_pages):
+            st.session_state.page += 1
+            st.rerun()
+
+    # Tab content
+    for tab, key in zip(tabs, tab_keys):
+        with tab:
+            st.markdown(description[key.lower()])
+    st.divider()
+
+#=======================================================================================================
+
+def show_evolution_chain(pokemon):
+    
+    evolutions = api.get_evolution_chain(pokemon)
+    
+    number_cols = len(evolutions) + len(evolutions)-1
+    columns = st.columns(number_cols)
+    column = 0
+
+    for evolution in evolutions:
+        
+        with columns[column]:
+            api.get_pokemon_sprite(evolution)
+
+        if column != number_cols:
+            column += 1
+            with columns[column]:
+                st.write("-->")
+        
+        else: break
+        column += 1
     

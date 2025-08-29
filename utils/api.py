@@ -1,6 +1,8 @@
 import requests
 import numpy as np
-import data_utils
+import utils.data_utils as data_utils
+from utils.cache import pokemon_data_cache
+
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
 
@@ -9,13 +11,19 @@ url = "https://pokeapi.co/api/v2/"
 # This function fetches data for a specific asset and name, with optional parameters
 
 def get_data(asset="", name="", params=None):
-    try:
-        response = requests.get(f"{url}{asset}/{name}", params=params)
-        response.raise_for_status()  # Raise an error for bad responses
-        return response.json()  # Return the JSON response
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        return None
+    
+    if name in pokemon_data_cache.keys():
+        return pokemon_data_cache[name]
+    
+    else:
+        try:
+            response = requests.get(f"{url}{asset}/{name}", params=params)
+            response.raise_for_status()  # Raise an error for bad responses
+            pokemon_data_cache[name] = response.json() # Cache the data for later use
+            return response.json()  # Return the JSON response
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+            return None
 
 #_____________________________________________________________________________________________________
 # Function to fetch the types of a given Pokemon
@@ -77,16 +85,19 @@ def get_pokemon_description(pokemon_name):
     # In English, many are almost identical with only slight variations.
     pokemon_data = get_data(asset="pokemon-species", name=pokemon_id)
 
-    raw_descriptions = [entry["flavor_text"] for entry in pokemon_data["flavor_text_entries"]
-                       if entry["language"]["name"] == "en"]
+    try:
+        raw_descriptions = {entry["version"]["name"]: entry["flavor_text"] 
+                    for entry in pokemon_data["flavor_text_entries"]
+                    if entry["language"]["name"] == "en"}
+    except Exception:
+        raw_descriptions = "There's no description available for this Pokémon."
 
     # Text cleaning
     clean_description = data_utils.clean_texts(raw_descriptions)
-    unique_descriptions = data_utils.remove_similar_texts2(list(clean_description))
+    #unique_descriptions = data_utils.remove_similar_texts(list(clean_description))
 
-    full_description = "".join(unique_descriptions)
-
-    return full_description
+    #full_description = "".join(unique_descriptions)
+    return clean_description
 #_____________________________________________________________________________________________________
 # Function to fetch damage relations for a given Pokemon
 
@@ -182,6 +193,23 @@ def get_damage_relations(pokemon):
 
 #_____________________________________________________________________________________________________
  
+def get_evolution_chain(pokemon_name):
+    """Fetches the evolution chain for a given Pokémon name."""
+    # 1. Get species info
+    species = get_data("pokemon-species", pokemon_name)
+    evo_url = species["evolution_chain"]["url"]
+
+    # 2. Get evolution chain
+    evo_chain = requests.get(evo_url).json()
+    current = evo_chain["chain"]
+
+    evolutions = []
+
+    while current:
+        evolutions.append(current["species"]["name"])
+        current = current["evolves_to"][0] if current["evolves_to"] else None
+
+    return evolutions
 
 
-print(get_pokemon_description("pikachu"))
+print(get_evolution_chain("pikachu"))

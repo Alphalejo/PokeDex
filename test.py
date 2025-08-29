@@ -176,84 +176,78 @@ data = api.get_data("pokemon", pokemon)
 #""", unsafe_allow_html=True)
 
 
-
 import streamlit as st
 import utils.api as api
 
-def loading():
-    lottie_html = """
-                <h3 style="text-align: center; color: #FFF; padding-top: 50px;">Fighting...</h3>
-                <div style="display: flex; justify-content: center; align-items: center;">
-                    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
-                    <dotlottie-wc 
-                        src="https://lottie.host/9c3f548f-1f6b-4b43-bda7-78a72e2a0d0a/Nl7MBaCpvO.lottie"
-                        style="width: 100px; height: 100px;" 
-                        speed="1" autoplay loop>
-                    </dotlottie-wc>
-                </div>
-                """
+def show_description(pokemon):
+    description = api.get_pokemon_description(pokemon)
 
-    return st.components.v1.html(lottie_html, height=400)
-
-loading()
-
-pokemon = "venusaur"
-data = api.get_data("pokemon", pokemon)
-st.markdown(f"""
-    <div style='text-align: center; position: relative; display: inline-block;'>
-        <h1>{pokemon.capitalize()} Wins</h1>
-        <img src='{data["sprites"]["front_default"]}' width='250' style='position: relative; z-index: 1;'/>
-        <!-- GIF de celebración superpuesto -->
-        <img src='https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExODg0MWZydW1lMjJ3Zjd2YnM3cTU4ZXVqZXduNzd5eW5sbnY0YjQ0cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gKrbnqo25MlI2TUC78/giphy.gif'
-             style='position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; width: 300px;'/>
-        <h3>#{data['id']}</h3>
-    </div>
-""", unsafe_allow_html=True)
-
-import utils.ui_blocks as ui_blocks
-import utils.charts as charts
-
-class pokemondata:
-    def __init__(self, asset, name):
-        self.asset = asset
-        self.name = name
-
-    def display(self):
-        ui_blocks.pokemon_data(self.asset, self.name)
-        st.plotly_chart(charts.pokemon_stats_chart(asset=self.asset, name=self.name), use_container_width=True)
+    st.tabs(description.keys())
+    
+    st.divider()
 
 
-function = st.pills(
-    label="Select Function",
-    options=["Information", "Compare", "VS", "Team Generator"],
-    selection_mode="single",
-    default="Information",
-)
+description = api.get_pokemon_description("pikachu")
 
 
-with st.empty():
-    if function == "Information":
-        viewer = pokemondata("pokemon", "pikachu")
-        viewer.display()
+import streamlit as st
+import math
 
-    elif function == "Compare":
-        ui_blocks.pokemon_data("pokemon", "mew")
-        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mew"), use_container_width=True)
+# Sample data
+keys = list(description.keys())
+page_size = 9
+num_pages = math.ceil(len(keys) / page_size)
 
-    elif function == "VS":
-        ui_blocks.pokemon_data("pokemon", "mewtwo")
-        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mewtwo"), use_container_width=True)
+# Session state to track current page
+if "page" not in st.session_state:
+    st.session_state.page = 1
 
+# Layout: arrows + tabs in one row
+nav_cols = st.columns([1, 10, 1])  # Adjust proportions as needed
 
+with nav_cols[0]:
+    if st.button("◀", disabled=st.session_state.page == 1):
+        st.session_state.page -= 1
+        st.rerun()
 
-if function == "Information":
-        ui_blocks.pokemon_data("pokemon", "pikachu")
-        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="pikachu"), use_container_width=True)
+start = (st.session_state.page - 1) * page_size
+end = start + page_size
+tab_keys = keys[start:end]
 
-elif function == "Compare":
-        ui_blocks.pokemon_data("pokemon", "mew")
-        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mew"), use_container_width=True)
+with nav_cols[1]:
+    tabs = st.tabs(tab_keys)
 
-elif function == "VS":
-        ui_blocks.pokemon_data("pokemon", "mewtwo")
-        st.plotly_chart(charts.pokemon_stats_chart(asset="pokemon", name="mewtwo"), use_container_width=True)
+with nav_cols[2]:
+    if st.button("▶", disabled=st.session_state.page == num_pages):
+        st.session_state.page += 1
+        st.rerun()
+
+# Tab content
+for tab, key in zip(tabs, tab_keys):
+    with tab:
+        st.markdown(description[key])
+
+#====================================================
+
+pokemon= "pikachu"
+    
+evolutions = api.get_evolution_chain(pokemon)
+
+number_cols = len(evolutions) + len(evolutions)-1
+columns = st.columns(number_cols)
+column = 0
+print(number_cols)
+
+for evolution in evolutions:
+    print(column)
+    with columns[column]:
+        api.get_pokemon_sprite(evolution)
+
+    if column < number_cols-1:
+        column += 1
+        print(column)
+        with columns[column]:
+            st.write("-->")
+    
+    else: break
+    column += 1
