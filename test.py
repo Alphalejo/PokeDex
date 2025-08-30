@@ -238,10 +238,14 @@ columns = st.columns(number_cols)
 column = 0
 print(number_cols)
 
+
 for evolution in evolutions:
     print(column)
     with columns[column]:
-        api.get_pokemon_sprite(evolution)
+        try:
+            st.image(api.get_pokemon_sprite(evolution), use_container_width=True)
+        except:
+            st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False)
 
     if column < number_cols-1:
         column += 1
@@ -251,3 +255,6 @@ for evolution in evolutions:
     
     else: break
     column += 1
+
+
+st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False, width=96)

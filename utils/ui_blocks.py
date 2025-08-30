@@ -33,7 +33,12 @@ def pokemon_data(asset="", asset_name=""):
     col1, col2 = st.columns([1,3])
 
     with col1:
-        st.image(data["sprites"]["front_default"], use_container_width=True)
+        
+        try:
+            st.image(data["sprites"]["front_default"], use_container_width=True)
+        except:
+            not_found_icon()
+                    
         st.markdown(f"<h3 style='text-align: center; padding-top: 0; margin-top: -30px;'>#{data['id']}</h3>", unsafe_allow_html=True)
     
     with col2:
@@ -54,11 +59,11 @@ def show_selected_pokemons(pokemons_to_compare):
 
     for i, pokemon in enumerate(pokemons_to_compare):
         with cols[i]:
-            sprite_url = api.get_pokemon_sprite(pokemon)
+            sprite_url = api.get_pokemon_sprite(pokemon, 96)
             st.markdown(
                 f"""
                 <div style='text-align:center;'>
-                    <img src="{sprite_url}" style="max-height:220px; width:auto;" />
+                    <img src="{sprite_url}" style="max-height:220px; width:auto; max-width:96px;" />
                     <h4>{pokemon.capitalize()}</h4>
                 </div>
                 """,
@@ -73,23 +78,37 @@ def compare_dashboard():
     Dashboard for comparing multiple Pokemon stats.
     """
     st.write("Compare Pokemon features")
-    pokemons_to_compare = st.multiselect(
+    all_pokemons_to_compare = st.multiselect(
         "Select Pokemons to compare:",
         options= api.all_pokemon_names(),
         max_selections=5
     )
 
-    if pokemons_to_compare:
+    if all_pokemons_to_compare:
 
-        show_selected_pokemons(pokemons_to_compare)
+        show_selected_pokemons(all_pokemons_to_compare)
 
-        st.dataframe(charts.pokemon_heatmap(pokemons_to_compare), use_container_width=True)
-        if len(pokemons_to_compare) > 1:
-            st.plotly_chart(charts.pokemon_multichart(pokemons_to_compare), use_container_width=True)
+        st.dataframe(charts.pokemon_heatmap(all_pokemons_to_compare), use_container_width=True)
         
+        #---------------------------------------------------------------
+        #virifies that all pokemons are valid
+        pokemons_to_compare = [] # Filtered data with valid pokemons
+
+        for pokemon in all_pokemons_to_compare:
+            data = api.get_data(asset="pokemon", name=pokemon)
+            if data and "stats" in data:
+                pokemons_to_compare.append(pokemon)
+        #---------------------------------------------------------------
+
+
+        if len(pokemons_to_compare) > 1:
+            try:
+                st.plotly_chart(charts.pokemon_multichart(pokemons_to_compare), use_container_width=True)
+            except:
+                st.write("No stats available for one or more of the selected Pokémons.")
 
     else:
-        st.write("Please select at least one Pokemon to compare.")
+        st.write("Please select at least two Pokemon to compare.")
 
 #______________________________________________________________________________________________________________
 
@@ -185,6 +204,11 @@ def loading_icon():
     return st.components.v1.html(lottie_html, height=400)
 
 
+def not_found_icon(max_width=300):
+    image_url = "https://i.imgur.com/D0hhq7h.png"
+
+    return st.image(image_url, use_container_width=False, width=max_width)
+
 #=======================================================================================================
 
 def show_description(pokemon):
@@ -224,9 +248,12 @@ def show_description(pokemon):
             st.rerun()
 
     # Tab content
-    for tab, key in zip(tabs, tab_keys):
-        with tab:
-            st.markdown(description[key.lower()])
+    try:
+        for tab, key in zip(tabs, tab_keys):
+            with tab:
+                st.markdown(description[key.lower()])
+    except:
+        st.write("No description available.")
     st.divider()
 
 #=======================================================================================================

@@ -2,6 +2,7 @@ import requests
 import numpy as np
 import utils.data_utils as data_utils
 from utils.cache import pokemon_data_cache
+from utils.ui_blocks import not_found_icon
 
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
@@ -23,7 +24,7 @@ def get_data(asset="", name="", params=None):
             return response.json()  # Return the JSON response
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
-            return None
+            return not_found_icon()
 
 #_____________________________________________________________________________________________________
 # Function to fetch the types of a given Pokemon
@@ -61,14 +62,17 @@ def all_pokemon_types():
 #_____________________________________________________________________________________________________
 # Function to fetch the sprite URL for a given Pokemon name
 
-def get_pokemon_sprite(pokemon_name):
+def get_pokemon_sprite(pokemon_name, width=200):
     """
     Fetches the sprite URL for a given Pokemon name.
     """
     data = get_data(asset="pokemon", name=pokemon_name)
     if data and "sprites" in data and "front_default" in data["sprites"]:
         return data["sprites"]["front_default"]
-    return None
+    
+    else:
+        #return not_found_icon(width)
+        return "https://i.imgur.com/D0hhq7h.png"
 
 #_____________________________________________________________________________________________________
 # Function to display the pokedex description of each pokemon
@@ -210,6 +214,3 @@ def get_evolution_chain(pokemon_name):
         current = current["evolves_to"][0] if current["evolves_to"] else None
 
     return evolutions
-
-
-print(get_evolution_chain("pikachu"))
