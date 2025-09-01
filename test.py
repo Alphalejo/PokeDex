@@ -229,32 +229,32 @@ for tab, key in zip(tabs, tab_keys):
 
 #====================================================
 
-pokemon= "pikachu"
-    
-evolutions = api.get_evolution_chain(pokemon)
 
-number_cols = len(evolutions) + len(evolutions)-1
-columns = st.columns(number_cols)
-column = 0
-print(number_cols)
+def show_evolution_chain(pokemon):
+    st.write("DEBUG type:", type(pokemon), "value:", pokemon)
+    evolutions = api.get_evolution_chain(pokemon)
+
+    number_cols = len(evolutions) + len(evolutions)-1
+    columns = st.columns(number_cols)
+    column = 0
+    print(number_cols)
 
 
-for evolution in evolutions:
-    print(column)
-    with columns[column]:
-        try:
-            st.image(api.get_pokemon_sprite(evolution), use_container_width=True)
-        except:
-            st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False)
-
-    if column < number_cols-1:
-        column += 1
+    for evolution in evolutions:
         print(column)
         with columns[column]:
-            st.write("-->")
-    
-    else: break
-    column += 1
+            try:
+                st.image(api.get_pokemon_sprite(evolution), use_container_width=True)
+            except:
+                st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False)
 
+        if column < number_cols-1:
+            column += 1
+            print(column)
+            with columns[column]:
+                st.write("-->")
+        
+        else: break
+        column += 1
 
-st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False, width=96)
+show_evolution_chain("Charmander")

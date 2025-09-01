@@ -1,8 +1,17 @@
 import requests
 import numpy as np
+import logging
+
 import utils.data_utils as data_utils
 from utils.cache import pokemon_data_cache
 from utils.ui_blocks import not_found_icon
+
+#config logging
+logging.basicConfig(
+    filename='app.log',  # This is the file where the logs will be stored
+    level=logging.DEBUG,  # Set the level to capture all logs
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 # Connect to the API
 url = "https://pokeapi.co/api/v2/"
@@ -197,10 +206,10 @@ def get_damage_relations(pokemon):
 
 #_____________________________________________________________________________________________________
  
-def get_evolution_chain(pokemon_name):
+def get_evolution_chain(pokemon_name: str):
     """Fetches the evolution chain for a given Pokémon name."""
     # 1. Get species info
-    species = get_data("pokemon-species", pokemon_name)
+    species = get_data("pokemon-species", pokemon_name.capitalize())
     evo_url = species["evolution_chain"]["url"]
 
     # 2. Get evolution chain
@@ -212,5 +221,7 @@ def get_evolution_chain(pokemon_name):
     while current:
         evolutions.append(current["species"]["name"])
         current = current["evolves_to"][0] if current["evolves_to"] else None
+    
+    logging.info(f"Elovution chain of {pokemon_name}: {evolutions}")
 
     return evolutions

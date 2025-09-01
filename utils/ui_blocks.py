@@ -259,23 +259,43 @@ def show_description(pokemon):
 #=======================================================================================================
 
 def show_evolution_chain(pokemon):
-    
+    print(pokemon)
     evolutions = api.get_evolution_chain(pokemon)
-    
+
     number_cols = len(evolutions) + len(evolutions)-1
     columns = st.columns(number_cols)
     column = 0
 
     for evolution in evolutions:
-        
         with columns[column]:
-            api.get_pokemon_sprite(evolution)
+            try:
+                sprite_url = api.get_pokemon_sprite(evolution)
+                st.markdown(
+                    f"""
+                    <div style='text-align:center; overflow: visible;'>
+                        <img src="{sprite_url}" style="max-height:220px; width:auto; max-width:96px;" />
+                        <h4>{evolution.capitalize()}</h4>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-        if column != number_cols:
+            except:
+                st.image("https://i.imgur.com/D0hhq7h.png", use_container_width=False)
+
+        if column < number_cols-1:
             column += 1
             with columns[column]:
-                st.write("-->")
+                st.markdown(
+                    """
+                    <div style='display: flex; justify-content: center; align-items: center; height: 100px;'>
+                        <img src='https://i.imgur.com/sTF7vbT.png' style='height: 50px;'>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
         
         else: break
         column += 1
-    
+    st.divider()
+        
