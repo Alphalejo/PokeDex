@@ -51,11 +51,18 @@ with tab1:
         #print(asset, asset_name) # Debugging line to check the asset and name
         
         if asset == "pokemon":
+            
             ui_blocks.pokemon_data(asset, asset_name)
+
+            ui_blocks.chatbot_ui(asset_name)
 
             ui_blocks.show_description(asset_name)
 
-            st.markdown("## Evolutions")
+            st.markdown("""
+                <div style='text-align: center;'>
+                        <h2>Evolutions</h2>
+                </div>
+            """, unsafe_allow_html=True)
             try:
                 ui_blocks.show_evolution_chain(asset_name)
             except:

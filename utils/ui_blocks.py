@@ -6,7 +6,7 @@ import utils.api as api
 import utils.styles as styles
 import utils.charts as charts
 import utils.ML_algorithms as ML
-from utils.cache import pokemon_data_cache
+import utils.chatbot as chatbot
 
 def show_pokemon_types(type_names):
     badges = "".join([styles.pokemon_type(type_name) for type_name in type_names])
@@ -298,4 +298,48 @@ def show_evolution_chain(pokemon):
         else: break
         column += 1
     st.divider()
+
+#=======================================================================================================
+
+# Functions to run the AI chatbot with professor oak
+
+# Create and build the chatbot
+def chatbot_ui(pokemon):
+
+    oak_avatar = "https://i.imgur.com/3vZSHwH.png"
+    user_avatar = "https://i.imgur.com/h3kK4Cp.png"
+
+    if "history" not in st.session_state:
+        st.session_state.history = []
+
+    if prompt := st.chat_input("Ask Professor Oak anything about Pokémon"):
+        with st.chat_message("user", avatar=user_avatar):
+            st.write(prompt)
+
+        st.session_state.history.append({"role": "user", "content": prompt})
+
+        answer = chatbot.professor_oak(prompt, pokemon)
+
+        with st.chat_message("assistant", avatar=oak_avatar):
+            st.write(answer)
+    
+        st.session_state.history.append({"role": "assistant", "content": answer})
+
+# make chatbot collapsible to run only when necessary
+def start_chat_ui(pokemon):
+
+    if "enabled" not in st.session_state:
+        st.session_state.enabled = False
+    
+    if st.session_state.enabled == False:
+        if st.button("chat with oak", on_click=lambda: st.session_state.update({"enabled": True})):
+            start_chat_ui(pokemon, enabled=True)
         
+
+    if st.session_state.enabled == True:        
+        with st.container(height=200, border=True):        
+            chatbot_ui(pokemon)
+            st.button("End Chat", on_click=lambda: st.session_state.update({"enabled": False}))
+    
+    st.session_state.enabled = False
+

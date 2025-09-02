@@ -2,7 +2,7 @@ import requests
 import numpy as np
 import logging
 
-import utils.data_utils as data_utils
+from . import data_utils
 from utils.cache import pokemon_data_cache
 from utils.ui_blocks import not_found_icon
 
