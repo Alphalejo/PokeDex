@@ -44,11 +44,18 @@ with tab1:
     if "asset_name" not in st.session_state:
         st.session_state.asset_name = []
 
-    #input for asset name
-    asset_name = str(st.selectbox(
-        "Enter the name of a Pokemon:",
-        options=api.all_pokemon_names())
-    )
+    if asset == "Pakemon":
+        #input for asset name
+        asset_name = str(st.selectbox(
+            "Enter the name of a Pokemon:",
+            options=api.all_items_names("pokemon"))
+        )
+    elif asset == "Berry":
+        #input for asset name
+        asset_name = str(st.selectbox(
+            "Enter the name of a berry:",
+            options=api.all_items_names("pokemon"))
+        )
 
     if asset_name != st.session_state.asset_name:
         st.session_state.asset_name = asset_name
@@ -106,7 +113,7 @@ with tab3:
     with col1:
         pokemon1 = st.selectbox(
             "Select the first Pokemon:",
-            options=api.all_pokemon_names(),
+            options=api.all_items_names("pokemon"),
             index=None,
             placeholder = "Select a Pokemon"
         )
@@ -121,7 +128,7 @@ with tab3:
     with col2:
         pokemon2 = st.selectbox(
             "Select the second Pokemon:",
-            options=api.all_pokemon_names(),
+            options=api.all_items_names("pokemon"),
             index=None,
             placeholder = "Select a Pokemon"
         )

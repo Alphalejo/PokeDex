@@ -175,7 +175,7 @@ data = api.get_data("pokemon", pokemon)
 #    </div>
 #""", unsafe_allow_html=True)
 
-
+"""
 import streamlit as st
 import utils.api as api
 
@@ -258,3 +258,16 @@ def show_evolution_chain(pokemon):
         column += 1
 
 show_evolution_chain("Charmander")
+"""
+
+
+import streamlit as st
+import utils.api as api
+import requests
+
+url = "https://pokeapi.co/api/v2/"
+
+response = requests.get(url+"berry?limit=20000").json()
+berries_names = [entry['name'] for entry in response['results']]
+
+print (berries_names)

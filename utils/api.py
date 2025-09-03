@@ -51,12 +51,12 @@ def get_pokemon_types(pokemon_name):
 # Function to fetch data for all Pokemon names
 # This function fetches data for all Pokemon and displays their names in a multiselect widget
 
-def all_pokemon_names():
+def all_items_names(asset):
 
-    response = requests.get(url+"pokemon?limit=20000").json()
-    pokemon_names = [entry['name'] for entry in response['results']]
+    response = requests.get(url+ asset +"?limit=20000").json()
+    items_names = [entry['name'] for entry in response['results']]
     
-    return pokemon_names
+    return items_names
 
 #_____________________________________________________________________________________________________
 # Function to fetch all Pokemon types
