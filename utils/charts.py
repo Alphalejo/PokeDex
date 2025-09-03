@@ -129,7 +129,7 @@ def pokemon_heatmap(pokemons_to_compare):
     Fetches and displays a heatmap comparing multiple Pokemon stats.
     """
 
-    df = pd.DataFrame(columns=["Pokemon", "HP", "Attack", "Defense", "Special Attack", "Special Defense", "Speed"])
+    df = pd.DataFrame(columns=["Pokemon", "HP", "Attack", "Defense", "Special Attack", "Special Defense", "Speed", "Total"])
     
     for pokemon in pokemons_to_compare:
         
@@ -141,7 +141,9 @@ def pokemon_heatmap(pokemons_to_compare):
                     "Defense": data['stats'][2]['base_stat'],
                     "Special Attack": data['stats'][3]['base_stat'],
                     "Special Defense": data['stats'][4]['base_stat'],
-                    "Speed": data['stats'][5]['base_stat']}
+                    "Speed": data['stats'][5]['base_stat'],
+                    "Total": sum([data['stats'][i]['base_stat'] for i in range(6)])
+                    }
             new_row = pd.DataFrame([stats])
             df = pd.concat([df, new_row], ignore_index=True)
         except:

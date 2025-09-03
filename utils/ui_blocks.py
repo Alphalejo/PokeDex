@@ -12,7 +12,7 @@ def show_pokemon_types(type_names):
     badges = "".join([styles.pokemon_type(type_name) for type_name in type_names])
     types = st.markdown(
         f"""
-        <div style='display: flex; gap: 8px; flex-wrap: wrap;'>
+        <div style='display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;'>
             {badges}
         """,
         unsafe_allow_html=True
@@ -30,22 +30,31 @@ def pokemon_data(asset="", asset_name=""):
     data = api.get_data(asset, asset_name)
 
     type_names = api.get_pokemon_types(asset_name)
-    col1, col2 = st.columns([1,3])
 
-    with col1:
-        
-        try:
-            st.image(data["sprites"]["front_default"], use_container_width=True)
-        except:
-            not_found_icon()
-                    
-        st.markdown(f"<h3 style='text-align: center; padding-top: 0; margin-top: -30px;'>#{data['id']}</h3>", unsafe_allow_html=True)
+    try:
+        st.image(data["sprites"]["front_default"], use_container_width=True)
+    except:
+        not_found_icon()
+                
+    st.markdown(
+    """
+    <style>
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True)
+
+    st.markdown(f"""
+                <div style='text-align: center;'><h3 style='text-align: center; padding: 0; margin-top: -30px;'>#{data['id']}</h3>
+                <h3 style='padding: 0;'>{asset_name.capitalize()}</h3></div>
+                """, unsafe_allow_html=True)
     
-    with col2:
-        st.header(f"{asset_name.capitalize()}")
-        #____________________________________________________________________________________________________
-        show_pokemon_types(type_names)
-      #______________________________________________________________________________________________________
+    show_pokemon_types(type_names)
+    #____________________________________________________________________________________________________
+    
+    #______________________________________________________________________________________________________
     
 
 #=========================================================================================================================
@@ -217,10 +226,10 @@ def show_description(pokemon):
     # Sample data
     keys = list(description.keys())
     keys = [key.capitalize() for key in keys]
-    page_size = 8
+    page_size = 6
     num_pages = math.ceil(len(keys) / page_size)
 
-    st.subheader("Description on Each Generation")
+    st.markdown("<div style='text-align: center;'><h3>Description on Each Generation</h3></div>", unsafe_allow_html=True)
 
     # Session state to track current page
     if "page" not in st.session_state:
@@ -254,7 +263,7 @@ def show_description(pokemon):
                 st.markdown(description[key.lower()])
     except:
         st.write("No description available.")
-    st.divider()
+
 
 #=======================================================================================================
 
@@ -302,28 +311,51 @@ def show_evolution_chain(pokemon):
 #=======================================================================================================
 
 # Functions to run the AI chatbot with professor oak
-
 # Create and build the chatbot
+@st.fragment()
 def chatbot_ui(pokemon):
 
     oak_avatar = "https://i.imgur.com/3vZSHwH.png"
     user_avatar = "https://i.imgur.com/h3kK4Cp.png"
 
-    if "history" not in st.session_state:
-        st.session_state.history = []
-
-    if prompt := st.chat_input("Ask Professor Oak anything about Pokémon"):
-        with st.chat_message("user", avatar=user_avatar):
-            st.write(prompt)
-
-        st.session_state.history.append({"role": "user", "content": prompt})
-
-        answer = chatbot.professor_oak(prompt, pokemon)
-
-        with st.chat_message("assistant", avatar=oak_avatar):
-            st.write(answer)
+    st.markdown("""
+        <style>
+                .st-emotion-cache-u4v75y{
+                    max-height: 400px;
+                    overflow-y: auto;
+                     display: flex;
+                    flex-direction: column-reverse;
+                }
+        </style>
+    """, unsafe_allow_html=True)
     
-        st.session_state.history.append({"role": "assistant", "content": answer})
+
+    with st.container(border=True):
+        if "history" not in st.session_state:
+            st.session_state.history = []
+
+        with st.chat_message("system", avatar=oak_avatar):
+            st.write(f"Hey there, young trainer! I'm Professor Oak, and I've spent my life studying Pokémon. Do you want to know more about {pokemon}?")
+
+        for message in st.session_state.history:
+            with st.chat_message(message["role"], avatar=oak_avatar if message["role"] == "assistant" else user_avatar):
+                st.write(message["content"])
+
+        prompt = st.chat_input("Ask Professor Oak anything about Pokémon")
+
+        if prompt:
+
+            st.session_state.history.append({"role": "user", "content": prompt})
+
+            #answer = chatbot.professor_oak(prompt, pokemon)
+            answer = "Your mission is to educate, inspire, and support trainers in their journey through the Pokémon world."
+
+            st.session_state.history.append({"role": "assistant", "content": answer})
+
+            st.rerun()
+    
+    
+    st.button("Clear", on_click=lambda: st.session_state.update({"history": []}))
 
 # make chatbot collapsible to run only when necessary
 def start_chat_ui(pokemon):

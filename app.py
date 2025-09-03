@@ -41,22 +41,37 @@ with tab1:
         default="Pokemon",)
     ).lower()
 
+    if "asset_name" not in st.session_state:
+        st.session_state.asset_name = []
+
     #input for asset name
     asset_name = str(st.selectbox(
         "Enter the name of a Pokemon:",
         options=api.all_pokemon_names())
     )
+
+    if asset_name != st.session_state.asset_name:
+        st.session_state.asset_name = asset_name
+        st.session_state.history = []
+
     # Display the Pokemon data
     if asset_name:
         #print(asset, asset_name) # Debugging line to check the asset and name
         
         if asset == "pokemon":
             
-            ui_blocks.pokemon_data(asset, asset_name)
+            cols = st.columns([1,3], vertical_alignment="center")
 
-            ui_blocks.chatbot_ui(asset_name)
+            with cols[0]:
+                ui_blocks.pokemon_data(asset, asset_name)
 
-            ui_blocks.show_description(asset_name)
+            with cols[1]:
+                with st.container():
+                    ui_blocks.show_description(asset_name)
+
+            
+            with st.container():
+                ui_blocks.chatbot_ui(asset_name)
 
             st.markdown("""
                 <div style='text-align: center;'>
@@ -97,7 +112,10 @@ with tab3:
         )
 
         # Display the pokemon selected
-        if pokemon1: ui_blocks.pokemon_data("pokemon", pokemon1)
+        if pokemon1:
+            left, center, right = st.columns([1,2,1])
+            with center:
+                ui_blocks.pokemon_data("pokemon", pokemon1)
 
     # Select the second pokemon
     with col2:
@@ -109,8 +127,11 @@ with tab3:
         )
 
         # Display the pokemon selected
-        if pokemon2: ui_blocks.pokemon_data("pokemon", pokemon2)
-
+        if pokemon2: 
+            left, center, right = st.columns([1,2,1])
+            with center:
+                ui_blocks.pokemon_data("pokemon", pokemon2)
+    
     try:
         # Calculate the posible winner in a battle
         if pokemon1 and pokemon2:
