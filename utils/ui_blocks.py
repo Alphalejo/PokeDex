@@ -1,6 +1,6 @@
 import streamlit as st
 import math
-
+import pandas as pd
 
 import utils.api as api
 import utils.styles as styles
@@ -375,3 +375,52 @@ def start_chat_ui(pokemon):
     
     st.session_state.enabled = False
 
+#=======================================================================================================
+
+def berry_dashboard(asset_name):
+
+    response = api.get_data("berry", asset_name)
+
+    cols = st.columns([2,5])
+
+    name = response['name'].capitalize()
+    id = response['id']
+    size = response['size']
+    smoothness = response['smoothness']
+    growth_time = response['growth_time']
+    soil_dryness = response['soil_dryness']
+    max_harvest = response['max_harvest']
+    natural_gift_type = response['natural_gift_type']['name']
+    natural_gift_power = response['natural_gift_power']
+
+    with cols[0]:
+
+        st.markdown(f"""
+        <div style='text-align: left;'>
+            <div style='display:flex;'><h2>{name}</h2><img style='object-fit: contain;' src='{api.berry_image(response)}'></div>
+            <h3 style='padding:0'>ID: #{id}</h3>
+            <p style='padding:0; margin-bottom: 0;'><b>Size:</b> {size}</p>
+            <p style='padding:0; margin-bottom: 0;'><b>Smoothness:</b> {smoothness}</p>
+            <p style='padding:0; margin-bottom: 0;'><b>Growth Time:</b> {growth_time} days</p>
+            <p style='padding:0; margin-bottom: 0;'><b>Soil Dryness:</b> {soil_dryness}</p>
+            <p style='padding:0; margin-bottom: 0;'><b>Max Harvest:</b> {max_harvest}</p>
+            <p style='padding:0; margin-bottom: 0;'><b>Natural Gift Type:</b> {natural_gift_type}</p>
+            <p style='padding:0; '><b>Natural Gift Power:</b> {natural_gift_power}</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    with cols[1]:
+        chatbot_ui(asset_name + " berry")
+
+
+    #__________________________________________________________________________
+    # Flavors
+    flavors = response['flavors']
+
+    flavor_names = [flavors[i]['flavor']['name'] for i in range(len(flavors))]
+    flavor_potency = [flavors[i]['potency'] for i in range(len(flavors))]
+
+    flavors_df = pd.DataFrame(flavor_potency, index=flavor_names).T
+
+    st.subheader("Flavors")
+    st.table(flavors_df)

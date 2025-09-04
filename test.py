@@ -264,10 +264,71 @@ show_evolution_chain("Charmander")
 import streamlit as st
 import utils.api as api
 import requests
+import pandas as pd
 
 url = "https://pokeapi.co/api/v2/"
 
-response = requests.get(url+"berry?limit=20000").json()
-berries_names = [entry['name'] for entry in response['results']]
 
-print (berries_names)
+def berry_image(response):
+    item_link = response['item']['url']
+    image = requests.get(item_link).json()['sprites']['default']
+
+    try:
+            return image
+    except:
+            return None
+
+asset = "berry"
+raw_name = "cheri"
+response = requests.get(f"{url}{asset}/{raw_name}", params=None).json()
+#info = extraer_info_baya(response.json())
+
+#st.table(response['name'])
+
+cols = st.columns([2,5])
+
+name = response['name'].capitalize()
+id = response['id']
+size = response['size']
+smoothness = response['smoothness']
+growth_time = response['growth_time']
+soil_dryness = response['soil_dryness']
+max_harvest = response['max_harvest']
+natural_gift_type = response['natural_gift_type']['name']
+natural_gift_power = response['natural_gift_power']
+
+with cols[0]:
+
+    st.markdown(f"""
+    <div style='text-align: left;'>
+        <div style='display:flex;'><h2>{name}</h2><img style='object-fit: contain;' src='{berry_image(response)}'></div>
+        <h3 style='padding:0'>ID: #{id}</h3>
+        <p style='padding:0; margin-bottom: 0;'><b>Size:</b> {size}</p>
+        <p style='padding:0; margin-bottom: 0;'><b>Smoothness:</b> {smoothness}</p>
+        <p style='padding:0; margin-bottom: 0;'><b>Growth Time:</b> {growth_time} days</p>
+        <p style='padding:0; margin-bottom: 0;'><b>Soil Dryness:</b> {soil_dryness}</p>
+        <p style='padding:0; margin-bottom: 0;'><b>Max Harvest:</b> {max_harvest}</p>
+        <p style='padding:0; margin-bottom: 0;'><b>Natural Gift Type:</b> {natural_gift_type}</p>
+        <p style='padding:0; '><b>Natural Gift Power:</b> {natural_gift_power}</p>
+    </div>
+""", unsafe_allow_html=True)
+
+with cols[1]:
+    pass
+
+
+
+#__________________________________________________________________________
+# Flavors
+flavors = response['flavors']
+
+flavor_names = [flavors[i]['flavor']['name'] for i in range(len(flavors))]
+flavor_potency = [flavors[i]['potency'] for i in range(len(flavors))]
+
+flavors_df = pd.DataFrame(flavor_potency, index=flavor_names).T
+st.table(flavors_df)
+#__________________________________________________________________________
+
+
+for i in range(len(flavors)):
+    print(flavors[i]['flavor']['name'], flavors[i]['potency'])

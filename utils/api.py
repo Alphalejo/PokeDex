@@ -225,3 +225,14 @@ def get_evolution_chain(pokemon_name: str):
     logging.info(f"Elovution chain of {pokemon_name}: {evolutions}")
 
     return evolutions
+
+#_____________________________________________________________________________________________________
+
+def berry_image(response):
+    item_link = response['item']['url']
+    image = requests.get(item_link).json()['sprites']['default']
+
+    try:
+            return image
+    except:
+            return None
