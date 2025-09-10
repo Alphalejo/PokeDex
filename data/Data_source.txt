@@ -1,0 +1,1 @@
+The datasets downloaded here to train the model were taken from kaggle: https://www.kaggle.com/datasets/terminus7/pokemon-challenge?resource=download&select=combats.csv
