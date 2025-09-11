@@ -1,78 +1,59 @@
 import streamlit as st
-import time
+import utils.api as api
 
-@st.fragment()
-def chatbot_ui(pokemon):
+def locations_ui(location):
 
-    oak_avatar = "https://i.imgur.com/3vZSHwH.png"
-    user_avatar = "https://i.imgur.com/h3kK4Cp.png"
+    data = api.get_data("location", name=location)
 
-    st.markdown("""
-        <style>
-                .st-emotion-cache-u4v75y{
-                    max-height: 400px;
-                    overflow-y: auto;
-                     display: flex;
-                    flex-direction: column-reverse;
-                }
-        </style>
-    """, unsafe_allow_html=True)
+    st.session_state.sublocation = False
+    
+    try:
+        name = next((place["name"] for place in data["names"] if place["language"]["name"] == "en"), location)
+    except:
+        name = location
+
+    try:
+        id = data["id"]
+    except:
+        id = ""
+
+    try:
+        areas = data["areas"]
+    except:
+        areas = False
+    
+    try:
+        generation = data["game_indices"][0]["generation"]["name"]
+    except:
+        generation = False
+
+    try:
+        region = data["region"]
+    except:
+        region = False
+    
 
 
-    with st.container(border=True):
-        if "history" not in st.session_state:
-            st.session_state.history = []
-        if "pending" not in st.session_state:
-            st.session_state.pending = None  # guarda la última pregunta pendiente
+    st.markdown(f"<h3>{name}</h3> <h4>ID: {id}</h4>", unsafe_allow_html=True)
 
-        with st.chat_message("system", avatar=oak_avatar):
-            st.write(f"Hey there, young trainer! I'm Professor Oak, and I've spent my life studying Pokémon. Do you want to know more about {pokemon}?")
 
-        # Renderizar historial
-        for message in st.session_state.history:
-            with st.chat_message(message["role"], avatar=oak_avatar if message["role"] == "assistant" else user_avatar):
-                st.write(message["content"])
+    if generation:
+        st.markdown(f"<h4>Generation: {generation.split('-')[-1].upper()}</h4>", unsafe_allow_html=True)
+    
+    if region:
+        st.markdown(f"<h4>Region: {region['name'].capitalize()}</h4>", unsafe_allow_html=True)
 
-        # Renderizar mientras se espera respuesta
-        if st.session_state.pending:
-            with st.chat_message("user", avatar=user_avatar):
-                st.write(st.session_state.pending)
 
-            with st.chat_message("system", avatar=oak_avatar):
-                st.markdown(
-                    f"""
-                    <div style="display: flex; align-items: flex-start;">
-                        <img src="https://i.imgur.com/QfGpyac.gif" 
-                            alt="writing GIF" width="60" style="margin-top: -40px; margin-left: -20px;">
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+    if areas:
+        st.markdown(f"<h4>Areas:</h4>", unsafe_allow_html=True)
 
-        prompt = st.chat_input("Ask Professor Oak anything about Pokémon")
-
-        if prompt:
-            # el usuario manda mensaje → se muestra inmediatamente como "pendiente"
-            st.session_state.pending = prompt
-
-            st.rerun()
-
-        # si hay un mensaje pendiente, generamos respuesta
-        if st.session_state.pending:
-            user_msg = st.session_state.pending
-            st.session_state.history.append({"role": "user", "content": user_msg})
+        for area in areas:
+            button = st.button("⏩", key=area["name"])
+            st.markdown(f"<li>{area['name']}: {button}</li>", unsafe_allow_html=True)
             
-            # === Llamada al LLM (simulada aquí) ===
-            # answer = chatbot.professor_oak(user_msg, pokemon)
-            time.sleep(2)
-            answer = "Your mission is to educate, inspire, and support trainers in their journey through the Pokémon world."
-            
-            st.session_state.history.append({"role": "assistant", "content": answer})
-            st.session_state.pending = None
-            st.rerun()
-
-    st.button("Clear", on_click=lambda: st.session_state.update({"history": [], "pending": None}))
+           # if st.button("⏩", key=area["name"]):
+            #    st.session_state.sublocation = area["url"].split("/")[-2]
 
 
 
-chatbot_ui("pikachu")
+locations_ui("ruin-maniac-cave")

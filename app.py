@@ -70,6 +70,13 @@ with tab1:
             "Enter the name of an Item:",
             options=api.all_items_names("item"))
         )
+    
+    elif asset == "location":
+        #input for asset name
+        asset_name = str(st.selectbox(
+            "Enter the name of a region or zone:",
+            options=api.all_items_names("location"))
+        )
 
     if "asset_name" not in st.session_state:
         st.session_state.asset_name = []
