@@ -8,6 +8,7 @@ import utils.charts as charts
 import utils.ML_algorithms as ML
 import utils.chatbot as chatbot
 import utils.cache as cache
+import utils.data_utils as data_utils
 
 
 import logging
@@ -234,7 +235,7 @@ def not_found_icon(max_width=300):
 def show_description(name ,is_item = False, cols = 6):
     
     if is_item:
-        description = cache.item_data[name]["Descriptions"]
+        description = cache.item_data_processed[name]["Descriptions"]
 
     else:
         description = api.get_pokemon_description(name)
@@ -284,9 +285,8 @@ def show_description(name ,is_item = False, cols = 6):
 
 
 #=======================================================================================================
-
+@st.fragment
 def show_evolution_chain(pokemon):
-    print(pokemon)
     evolutions = api.get_evolution_chain(pokemon)
 
     number_cols = len(evolutions) + len(evolutions)-1
@@ -357,7 +357,7 @@ def chatbot_ui(pokemon):
     # Custom CSS for chat container (reverse scroll and auto height)
     st.markdown("""
         <style>
-            .st-emotion-cache-u4v75y {
+            #stVerticalBlockBorderWrapper {
                 max-height: 400px;
                 overflow-y: auto;
                 display: flex;
@@ -468,6 +468,16 @@ def berry_dashboard(asset_name):
     """, unsafe_allow_html=True)
 
     with cols[1]:
+        st.markdown("""
+            <style>
+                #tabs-bui2-tabpanel-0 > div > div.st-emotion-cache-13o7eu2.eertqu02 > div > div.stColumn.st-emotion-cache-1kf3zl5.eertqu01 > div > div.st-emotion-cache-13o7eu2.eertqu02 > div > div.st-emotion-cache-u4v75y.eertqu02{
+                    max-height: 400px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column-reverse;
+                }
+            </style>
+        """,unsafe_allow_html=True)
         chatbot_ui(asset_name + " berry")
 
 
@@ -554,4 +564,228 @@ def items_visualization(name):
         logging.error(f"Error while visualizing item {name}: {e}", exc_info=True)
         st.subheader("Item not found")
     
+    st.markdown("""
+            <style>
+                #tabs-bui2-tabpanel-0 > div > div:nth-child(6) > div > div.st-emotion-cache-u4v75y.eertqu02{
+                    max-height: 400px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column-reverse;
+                }
+            </style>
+        """,unsafe_allow_html=True)
     chatbot_ui(name)
+
+
+#=======================================================================================================
+
+def pokemon_cards(pokemons, method="walk", chance=0, level=0, condition=None):
+    """
+    Render a grid of Pokémon cards in Streamlit.
+
+    Args:
+        pokemons (list[str]): List of Pokémon names.
+        method (list[str] or str): Encounter method(s).
+        chance (list[int] or int): Encounter chance(s).
+        level (list[int] or int): Maximum level(s).
+        condition (list or None): Encounter condition(s).
+    """
+
+    logging.info(f"Rendering cards for {len(pokemons)} Pokémon(s).")
+
+    # Split the list of Pokémon into chunks of 4 for grid display
+    chunk_list = [pokemons[i:i + 4] for i in range(0, len(pokemons), 4)]
+    cols = st.columns(4)
+    counter = 0
+
+    for chunk in chunk_list:
+        for i in range(4):
+            try:
+                pokemon_name = chunk[i]
+                logging.debug(f"Rendering card for {pokemon_name}.")
+
+                # Handle empty condition values
+                if condition and condition[counter] == []:
+                    condition[counter] = "None"
+
+                # Card container
+                with cols[i]:
+
+                    st.markdown("""
+                        <style>
+                            #tabs-bui2-tabpanel-0 > div > div.st-emotion-cache-u4v75y.eertqu02{
+                                width: 750px;
+                                max-height: fit-content;
+                            }
+                        </style>""", unsafe_allow_html=True)
+
+                    with st.container(border=True):
+                        # Pokémon image
+                        sprite = api.get_pokemon_sprite(pokemon_name)
+                        st.image(sprite, use_container_width=True)
+
+                        # Pokémon name
+                        st.markdown(
+                            f"""<div style='text-align: center; font-size: 20px; font-weight: 600;'>
+                                {pokemon_name.capitalize()}</div>""",
+                            unsafe_allow_html=True
+                        )
+
+                        # Pokémon types
+                        types = api.get_pokemon_types(pokemon_name)
+                        show_pokemon_types(types)
+
+                        # Extra details
+                        st.markdown(
+                            f"""
+                            <p style='font-size: 14px; margin-bottom: 0;'><strong>Method:</strong> {method[counter]} </br>
+                            <strong>Chance:</strong> {chance[counter]}% </br>
+                            <strong>Max Level:</strong> {level[counter]}</br>
+                            <strong>Conditions:</strong><li style='font-size: 14px;'>{condition[counter]}</li></p>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+                        counter += 1
+
+            except IndexError:
+                pass
+                #logging.warning("Attempted to access index out of range for one of the lists.")
+            except Exception as e:
+                logging.error(f"Error rendering card: {e}", exc_info=True)
+
+
+#=======================================================================================================
+
+def sub_area(sub_area):
+    """
+    Display details about a Pokémon sub-area including:
+    - Location metadata
+    - Encounter methods
+    - Pokémon encounters
+
+    Args:
+        sub_area (str): Name or identifier of the sub-area.
+    """
+
+    logging.info(f"Fetching sub-area data for: {sub_area}")
+
+    try:
+        # Extract sub-area data
+        location_name, location_id, location_game_index, encounter_methods, pokemon_encounters = api.sub_area_data(sub_area)
+        logging.debug(f"Sub-area data retrieved for {sub_area}: "
+                      f"location_name={location_name}, id={location_id}, game_index={location_game_index}")
+
+        # Section: Location information
+        st.subheader(location_name.capitalize())
+        st.markdown(
+            f"<h6 style='padding-bottom: 0;'>🆔 ID: {location_id}  &emsp; 🎮 Game Index: {location_game_index}</h6>",
+            unsafe_allow_html=True
+        )
+
+        st.divider()
+
+        # Section: Encounter methods
+        st.markdown("<h4 style='padding: 0;'>🚶 Encounter Methods:</h4>", unsafe_allow_html=True)
+
+        if encounter_methods:
+            logging.info(f"Encounter methods found: {list(encounter_methods.keys())}")
+            for method, versions in encounter_methods.items():
+                try:
+                    st.markdown(
+                        f"<li style='margin-left: 50px;'><strong style='font-size: 18px;'>{method.capitalize()}:</strong> "
+                        f"Encounter rate {versions[0]['rate']}%</li>",
+                        unsafe_allow_html=True
+                    )
+                except Exception as e:
+                    logging.error(f"Error rendering encounter method {method}: {e}", exc_info=True)
+        else:
+            logging.warning(f"No encounter methods found for sub-area: {sub_area}")
+            st.markdown("<p style='margin-left: 50px;'>No encounter methods available.</p>", unsafe_allow_html=True)
+
+        # Section: Pokémon encounters
+        st.markdown("<h4></br>🔍 Pokémon Encounters:</h4>", unsafe_allow_html=True)
+
+        if pokemon_encounters:
+            pokemons, method, chance, level, condition = data_utils.brief_pokemon_encounters(pokemon_encounters)
+            logging.info(f"Rendering {len(pokemons)} Pokémon encounter(s) for {sub_area}")
+            pokemon_cards(pokemons, method, chance, level, condition)
+        else:
+            logging.warning(f"No Pokémon encounters found for sub-area: {sub_area}")
+            st.markdown("<p>No Pokémon encounters available.</p>", unsafe_allow_html=True)
+
+    except Exception as e:
+        logging.error(f"Failed to render sub-area {sub_area}: {e}", exc_info=True)
+        st.error(f"⚠️ Could not load sub-area data for '{sub_area}'.")
+
+#=======================================================================================================
+
+def locations_ui(location: str):
+    """
+    Display location details including:
+    - Name, ID, generation, and region
+    - Sub-areas available in the location
+
+    Args:
+        location (str): The name or identifier of the location.
+    """
+
+    logging.info(f"Fetching location data for: {location}")
+
+    st.markdown("""
+            <style>
+                #tabs-bui2-tabpanel-0 > div > div.st-emotion-cache-13o7eu2.eertqu02 > div > div.st-emotion-cache-u4v75y.eertqu02{
+                    max-height: 400px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column-reverse;
+                }
+            </style>
+        """,unsafe_allow_html=True)
+
+    chatbot_ui(location)
+
+    try:
+        # Retrieve data for the location
+        name, id, areas, generation, region = api.locations_data(location)
+        logging.debug(f"Location data: name={name}, id={id}, generation={generation}, region={region}")
+
+        # Section: Location header
+        st.markdown(f"<h2>{name}</h2>", unsafe_allow_html=True)
+
+        if generation:
+            st.markdown(
+                f"<h5>🆔 ID: {id} &emsp; 👾 Generation: {generation.split('-')[-1].upper()}</h5>",
+                unsafe_allow_html=True
+            )
+        else:
+            logging.warning(f"No generation info for location: {location}")
+
+        if region:
+            st.markdown(f"<h4>🗺️ Region: {region['name'].capitalize()}</h4>", unsafe_allow_html=True)
+        else:
+            logging.warning(f"No region info for location: {location}")
+
+        # Section: Areas
+        if areas:
+            st.markdown("<h4>Areas:</h4>", unsafe_allow_html=True)
+
+            options = [area["name"] for area in areas]
+            selected = st.radio("Select an area", options)
+
+            # Render details for the selected area
+            for area in areas:
+                if selected == area["name"]:
+                    try:
+                        with st.container(border=True):
+                            sub_area(area["url"])
+                    except Exception as e:
+                        logging.error(f"Failed to render sub-area {area['name']} ({area['url']}): {e}", exc_info=True)
+                        st.error(f"⚠️ Could not load sub-area '{area['name']}'.")
+        else:
+            logging.warning(f"No areas found for location: {location}")
+            st.markdown("<p>No areas available for this location.</p>", unsafe_allow_html=True)
+
+    except Exception as e:
+        logging.error(f"Failed to load location {location}: {e}", exc_info=True)
+        st.error(f"⚠️ Could not load location data for '{location}'.")

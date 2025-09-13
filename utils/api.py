@@ -22,8 +22,16 @@ url = "https://pokeapi.co/api/v2/"
 
 def get_data(asset="", name="", params=None, ignore_cache = False):
     
-    if name in cache.cache_data.keys() and ignore_cache == False:
-        print("used cache")
+    if (asset=="item") and (name in cache.item_data.keys()) and (ignore_cache == False):
+        return cache.item_data[name]
+    
+    elif (asset=="location") and (name in cache.location.keys()) and (ignore_cache == False):
+        return cache.location[name]
+    
+    elif (asset=="location-area") and (name in cache.sub_location.keys()) and (ignore_cache == False):
+        return cache.sub_location[name]
+    
+    elif (name in cache.sub_location.keys()) and (ignore_cache == False):
         return cache.cache_data[name]
     
     else:
@@ -258,54 +266,131 @@ def items_data(name):
         dict: A dictionary containing the processed item data.
     """
 
-    logging.info(f"Fetching data for item: {name}")
+    if name in cache.item_data_processed.keys():
+        all_data = cache.item_data_processed[name]
+    
+    else:
+        logging.info(f"Fetching data for item: {name}")
+        
+        # API request for the given item 
+        asset = "item"
+        response = get_data(asset, name)
+        logging.debug(f"Raw API response for item {name}: {response}")
 
-    # API request for the given item 
-    asset = "item"
-    response = get_data(asset, name)
-    logging.debug(f"Raw API response for item {name}: {response}")
+        # Extract main attributes
+        attributes = [response['attributes'][i]['name'] for i in range(len(response['attributes']))]
+        baby_trigger_for = response['baby_trigger_for']
+        category = response['category']['name']
+        cost = response['cost']
 
-    # Extract main attributes
-    attributes = [response['attributes'][i]['name'] for i in range(len(response['attributes']))]
-    baby_trigger_for = response['baby_trigger_for']
-    category = response['category']['name']
-    cost = response['cost']
+        logging.info(f"Item {name} basic data extracted (category: {category}, cost: {cost})")
 
-    logging.info(f"Item {name} basic data extracted (category: {category}, cost: {cost})")
+        # Extract effects
+        effect = response['effect_entries'][0]['effect']
+        short_effect = response['effect_entries'][0]['short_effect']
 
-    # Extract effects
-    effect = response['effect_entries'][0]['effect']
-    short_effect = response['effect_entries'][0]['short_effect']
+        # Item image
+        image = response['sprites']['default']
 
-    # Item image
-    image = response['sprites']['default']
+        # Extract and filter English descriptions
+        descriptions = {
+            entry['version_group']['name']: entry['text']
+            for entry in response['flavor_text_entries']
+            if entry['language']['name'] == 'en'
+        }
+        logging.debug(f"Raw descriptions for {name}: {descriptions}")
 
-    # Extract and filter English descriptions
-    descriptions = {
-        entry['version_group']['name']: entry['text']
-        for entry in response['flavor_text_entries']
-        if entry['language']['name'] == 'en'
-    }
-    logging.debug(f"Raw descriptions for {name}: {descriptions}")
+        # Clean descriptions using data_utils helper
+        clean_descriptions = data_utils.clean_text(descriptions)
+        logging.info(f"Cleaned descriptions processed for item {name}")
 
-    # Clean descriptions using data_utils helper
-    clean_descriptions = data_utils.clean_text(descriptions)
-    logging.info(f"Cleaned descriptions processed for item {name}")
+        # Organize all data into a dictionary
+        all_data = {
+            "attributes": attributes,
+            "baby_trigger_for": baby_trigger_for,
+            "category": category,
+            "cost": cost,
+            "effect": effect,
+            "short_effect": short_effect,
+            "image_url": image,
+            "Descriptions": clean_descriptions
+        }
 
-    # Organize all data into a dictionary
-    all_data = {
-        "attributes": attributes,
-        "baby_trigger_for": baby_trigger_for,
-        "category": category,
-        "cost": cost,
-        "effect": effect,
-        "short_effect": short_effect,
-        "image_url": image,
-        "Descriptions": clean_descriptions
-    }
-
-    cache.item_data[name] = all_data
+        cache.item_data_processed[name] = all_data
 
     logging.info(f"Item {name} data successfully processed.")
 
     return all_data
+
+#_____________________________________________________________________________________________________
+
+
+def locations_data(location):
+
+    data = get_data("location", name=location)
+    
+    try:
+        name = next((place["name"] for place in data["names"] if place["language"]["name"] == "en"), location)
+    except:
+        name = location
+
+    try:
+        id = data["id"]
+    except:
+        id = ""
+
+    try:
+        areas = data["areas"]
+    except:
+        areas = False
+    
+    try:
+        generation = data["game_indices"][0]["generation"]["name"]
+    except:
+        generation = False
+
+    try:
+        region = data["region"]
+    except:
+        region = False
+
+    return name, id, areas, generation, region
+
+
+def sub_area_data(sub_area):
+    
+    id = sub_area.split("/")[-2]
+    data = get_data("location-area", id)
+
+    # Datos generales
+    location_name = data["name"]
+    location_id = data["id"]
+    location_game_index = data["game_index"]
+
+    # Métodos de encuentro
+    encounter_methods = {
+        method["encounter_method"]["name"]: [
+            {"version": v["version"]["name"], "rate": v["rate"]}
+            for v in method["version_details"]
+        ]
+        for method in data["encounter_method_rates"]
+    }
+
+    # Encuentros con Pokémon
+    pokemon_encounters = []
+    for encounter in data["pokemon_encounters"]:
+        pokemon_name = encounter["pokemon"]["name"]
+        for version_detail in encounter["version_details"]:
+            version = version_detail["version"]["name"]
+            for detail in version_detail["encounter_details"]:
+                pokemon_encounters.append({
+                    "pokemon": pokemon_name,
+                    "version": version,
+                    "method": detail["method"]["name"],
+                    "chance": detail["chance"],
+                    "min_level": detail["min_level"],
+                    "max_level": detail["max_level"],
+                    "conditions": [c["name"] for c in detail["condition_values"]]
+                })
+    
+    return location_name, location_id, location_game_index, encounter_methods, pokemon_encounters
