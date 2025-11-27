@@ -99,7 +99,7 @@ def compare_dashboard():
     """
     st.write("Compare Pokemon features")
     all_pokemons_to_compare = st.multiselect(
-        "Select Pokemons to compare:",
+        "Select up to 5 Pokemons to compare:",
         options= api.all_items_names("pokemon"),
         max_selections=5
     )
