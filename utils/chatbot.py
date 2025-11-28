@@ -16,10 +16,10 @@ load_dotenv()
 
 def check_token_limit(input_tokens = 0, output_tokens = 0):
     
-    with open("../data/tokens_records.json", "r") as f:
+    with open("tokens_records.json", "r") as f:
                 tokens_data = json.load(f)
     
-    with open("../data/tokens_records.json", "w") as f:
+    with open("tokens_records.json", "w") as f:
         tokens_data[str(date.today())]["input_tokens"] += input_tokens
         tokens_data[str(date.today())]["output_tokens"] += output_tokens
 
