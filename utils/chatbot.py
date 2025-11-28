@@ -18,7 +18,7 @@ def check_token_limit(input_tokens = 0, output_tokens = 0):
     
     # 1. Read existing data (if the file is empty or missing, initialize an empty dict)
     try:
-        with open("../data/tokens_records.json", "r", encoding="utf-8") as f:
+        with open("data/tokens_records.json", "r", encoding="utf-8") as f:
             tokens_data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         tokens_data = {}
@@ -33,7 +33,7 @@ def check_token_limit(input_tokens = 0, output_tokens = 0):
     tokens_data[today]["output_tokens"] += output_tokens
 
     # 4. Save updated data back to the JSON file
-    with open("../data/tokens_records.json", "w", encoding="utf-8") as f:
+    with open("data/tokens_records.json", "w", encoding="utf-8") as f:
         json.dump(tokens_data, f, indent=4, ensure_ascii=False)
 
     # 5. Log the updated values for debugging/monitoring
