@@ -16,16 +16,33 @@ load_dotenv()
 
 def check_token_limit(input_tokens = 0, output_tokens = 0):
     
-    with open("tokens_records.json", "r") as f:
-                tokens_data = json.load(f)
-    
-    with open("tokens_records.json", "w") as f:
-        tokens_data[str(date.today())]["input_tokens"] += input_tokens
-        tokens_data[str(date.today())]["output_tokens"] += output_tokens
+    # 1. Read existing data (if the file is empty or missing, initialize an empty dict)
+    try:
+        with open("data/tokens_records.json", "r", encoding="utf-8") as f:
+            tokens_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        tokens_data = {}
 
-    logging.info(f"Input tokens used: {tokens_data[str(date.today())]["input_tokens"]}, Output tokens used: {tokens_data[str(date.today())]["output_tokens"]}")
+    # 2. Initialize today's entry if it does not exist yet
+    today = str(date.today())
+    if today not in tokens_data:
+        tokens_data[today] = {"input_tokens": 0, "output_tokens": 0}
 
-    if tokens_data[str(date.today())]["input_tokens"] > 3 or tokens_data[str(date.today())]["output_tokens"] > 400:
+    # 3. Update values with new token counts
+    tokens_data[today]["input_tokens"] += input_tokens
+    tokens_data[today]["output_tokens"] += output_tokens
+
+    # 4. Save updated data back to the JSON file
+    with open("data/tokens_records.json", "w", encoding="utf-8") as f:
+        json.dump(tokens_data, f, indent=4, ensure_ascii=False)
+
+    # 5. Log the updated values for debugging/monitoring
+    logging.info(
+        f"Input tokens used: {tokens_data[today]['input_tokens']}, "
+        f"Output tokens used: {tokens_data[today]['output_tokens']}"
+    )
+
+    if tokens_data[str(date.today())]["input_tokens"] > 600 or tokens_data[str(date.today())]["output_tokens"] > 600:
         logging.warning("Token limit exceeded for today.")
         return False
     
@@ -89,10 +106,10 @@ def professor_oak(prompt, item):
 
             check_token_limit(input_tokens, output_tokens)
 
-            answer = "I'm sorry, young trainer. I've reached my research limit for today. Please come back tomorrow!"
+            answer = response.text
 
         else:
-            answer = response.text
+            answer = "I'm sorry, young trainer. I've reached my research limit for today. Please come back tomorrow!"
 
     except Exception as e:
         logging.error(f"Error generating response: {e}")
